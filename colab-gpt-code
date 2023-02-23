@@ -1,0 +1,45 @@
+# This program will use ChatGPT within out python program 
+# Code is tested on Google Colab but for testing beyond it may require modification 
+#Install openai package so that we can use the openai package . This code is tested to work on Google Colab 
+!pip install openai
+# First, we import the OpenAI package so we can use its functions.
+import openai
+
+# We set our OpenAI API key to a variable so we can use it later. 
+# This key allows us to access the GPT model and generate text.
+openai.api_key = "YOUR_API_KEY" # replace with your actual API key
+
+# We define a function called 'chat' that takes a 'prompt' argument. 
+# This function sends the prompt to the GPT model and returns its response.
+def chat(prompt):
+    # We use the 'openai.Completion.create' method to send the prompt to the GPT model.
+    # We specify the model ('engine') we want to use (in this case, 'davinci'), 
+    # the prompt we want to send, and some other parameters that control how the model responds.
+    response = openai.Completion.create(
+      engine="davinci",
+      prompt=prompt,
+      max_tokens=1024,
+      n=1,
+      stop=None,
+      temperature=0.7,
+    )
+
+    # We extract the response from the model's output, which is a list of 'choices'.
+    # We get the first choice (since we only requested one response) and extract its text.
+    # We also remove any extra whitespace (like newlines) from the beginning and end of the text.
+    message = response.choices[0].text.strip()
+
+    # We return the message as the result of the function.
+    return message
+
+# We create an infinite loop that prompts the user for input and sends it to the chat function.
+while True:
+    # We use the 'input' function to prompt the user for input and store it in a variable called 'prompt'.
+    prompt = input("You: ")
+
+    # We call the 'chat' function with the user's input as the argument.
+    # This sends the input to the GPT model and gets a response back.
+    response = chat(prompt)
+
+    # We use the 'print' function to display the GPT model's response to the user.
+    print("ChatGPT:", response)
