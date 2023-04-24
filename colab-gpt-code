@@ -7,7 +7,7 @@ import openai
 
 # We set our OpenAI API key to a variable so we can use it later. 
 # This key allows us to access the GPT model and generate text.
-openai.api_key = "YOUR_API_KEY" # replace with your actual API key
+openai.api_key = "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" # replace with your actual API key
 
 # We define a function called 'chat' that takes a 'prompt' argument. 
 # This function sends the prompt to the GPT model and returns its response.
