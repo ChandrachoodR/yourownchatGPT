@@ -1,45 +1,67 @@
-# This program will use ChatGPT within out python program 
-# Code is tested on Google Colab but for testing beyond it may require modification 
-#Install openai package so that we can use the openai package . This code is tested to work on Google Colab 
-!pip install openai
-# First, we import the OpenAI package so we can use its functions.
-import openai
+<!DOCTYPE html>
+<html lang="en">
 
-# We set our OpenAI API key to a variable so we can use it later. 
-# This key allows us to access the GPT model and generate text.
-openai.api_key = "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" # replace with your actual API key
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT UI</title>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
 
-# We define a function called 'chat' that takes a 'prompt' argument. 
-# This function sends the prompt to the GPT model and returns its response.
-def chat(prompt):
-    # We use the 'openai.Completion.create' method to send the prompt to the GPT model.
-    # We specify the model ('engine') we want to use (in this case, 'davinci'), 
-    # the prompt we want to send, and some other parameters that control how the model responds.
-    response = openai.Completion.create(
-      engine="davinci",
-      prompt=prompt,
-      max_tokens=1024,
-      n=1,
-      stop=None,
-      temperature=0.7,
-    )
+<body class="bg-gray-800 text-white min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md">
+        <div id="chatArea" class="bg-gray-700 p-4 rounded shadow-md mb-4 overflow-auto h-64">
+        </div>
+        <div>
+            <input id="promptInput" type="text" class="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none" placeholder="Type your message..." />
+            <button id="sendButton" class="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Send</button>
+        </div>
+    </div>
 
-    # We extract the response from the model's output, which is a list of 'choices'.
-    # We get the first choice (since we only requested one response) and extract its text.
-    # We also remove any extra whitespace (like newlines) from the beginning and end of the text.
-    message = response.choices[0].text.strip()
+    <script>
+        const chatArea = document.getElementById('chatArea');
+        const promptInput = document.getElementById('promptInput');
+        const sendButton = document.getElementById('sendButton');
+        const apiKey = 'your API Key here';  // replace this with your actual API key
 
-    # We return the message as the result of the function.
-    return message
+        sendButton.onclick = () => {
+            const prompt = promptInput.value;
+            promptInput.value = '';
+            chatArea.innerHTML += `<div class="bg-blue-500 text-white p-2 mt-2 rounded-lg w-3/4 float-right clear-both">You: ${prompt}</div>`;
 
-# We create an infinite loop that prompts the user for input and sends it to the chat function.
-while True:
-    # We use the 'input' function to prompt the user for input and store it in a variable called 'prompt'.
-    prompt = input("You: ")
+            fetch('https://api.openai.com/v1/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + apiKey
+                },
+                body: JSON.stringify({
+                    'model': 'text-davinci-003',
+                    'prompt': prompt,
+                    'max_tokens': 60
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.choices && data.choices.length > 0) {
+                    const reply = data.choices[0].text.trim();
+                    chatArea.innerHTML += `<div class="bg-gray-500 text-white p-2 mt-2 rounded-lg w-3/4 float-left clear-both">GPT-3: ${reply}</div>`;
+                } else {
+                    throw new Error(data.error.message || 'Unexpected error');
+                }
+                chatArea.scrollTop = chatArea.scrollHeight;
+            })
+            .catch(error => {
+                chatArea.innerHTML += `<div class="bg-red-500 text-white p-2 mt-2 rounded-lg w-full float-left clear-both">Error: ${error.message}</div>`;
+                chatArea.scrollTop = chatArea.scrollHeight;
+            });
+        };
+    </script>
+</body>
 
-    # We call the 'chat' function with the user's input as the argument.
-    # This sends the input to the GPT model and gets a response back.
-    response = chat(prompt)
-
-    # We use the 'print' function to display the GPT model's response to the user.
-    print("ChatGPT:", response)
+</html>
